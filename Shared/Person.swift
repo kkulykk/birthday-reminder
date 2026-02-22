@@ -16,6 +16,7 @@ final class Person {
     var notes: String?
     var congratulatedYear: Int?
     var missedYear: Int?
+    var isExcluded: Bool = false
 
     @Relationship(deleteRule: .cascade, inverse: \WishlistItem.person)
     var wishlistItems: [WishlistItem] = []
@@ -111,6 +112,44 @@ final class Person {
         let formatter = DateFormatter()
         formatter.dateFormat = birthdayYear != nil ? "MMMM d, yyyy" : "MMMM d"
         return formatter.string(from: date)
+    }
+
+    /// Most recent past birthday date (today or earlier)
+    var lastBirthdayDate: Date {
+        guard let month = birthdayMonth, let day = birthdayDay else { return .distantPast }
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        var comps = DateComponents()
+        comps.month = month
+        comps.day = day
+        comps.year = cal.component(.year, from: today)
+        if let thisYear = cal.date(from: comps), thisYear <= today {
+            return thisYear
+        }
+        comps.year = (comps.year ?? 0) - 1
+        return cal.date(from: comps) ?? .distantPast
+    }
+
+    /// How many days have passed since the last birthday (0 = today)
+    var daysSinceLastBirthday: Int {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        let last = cal.startOfDay(for: lastBirthdayDate)
+        return cal.dateComponents([.day], from: last, to: today).day ?? 0
+    }
+
+    /// True when `congratulatedYear` matches the year of the last birthday (rolling-year aware)
+    var isCongratulatedOnLastBirthday: Bool {
+        guard let cy = congratulatedYear else { return false }
+        return cy == Calendar.current.component(.year, from: lastBirthdayDate)
+    }
+
+    /// Age the person turns on their next birthday
+    var turningAge: Int? {
+        guard let year = birthdayYear else { return nil }
+        let cal = Calendar.current
+        let nextYear = cal.component(.year, from: nextBirthdayDate)
+        return nextYear - year
     }
 
     /// Days until next birthday (0 = today)

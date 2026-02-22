@@ -43,6 +43,7 @@
 		204C55D62F4B40B300B536BB /* Exceptions for "BirthdayShareExtension" folder in "BirthdayShareExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				BirthdayShareExtension.entitlements,
 				Info.plist,
 			);
 			target = 204C55CA2F4B40B300B536BB /* BirthdayShareExtension */;
@@ -50,6 +51,7 @@
 		204C55E22F4B414A00B536BB /* Exceptions for "BirthdayShareExtension" folder in "BirthdayReminder" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				ShareView.swift,
 				ShareViewController.swift,
 			);
 			target = 204C559E2F4B367B00B536BB /* BirthdayReminder */;
@@ -441,6 +443,7 @@
 		204C55D82F4B40B300B536BB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BirthdayShareExtension/BirthdayShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 28JPTEDA4Z;
@@ -469,6 +472,7 @@
 		204C55D92F4B40B300B536BB /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BirthdayShareExtension/BirthdayShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 28JPTEDA4Z;

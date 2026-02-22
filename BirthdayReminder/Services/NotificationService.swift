@@ -25,16 +25,26 @@ final class NotificationService {
 
             let content = UNMutableNotificationContent()
             content.title = "🎂 \(person.fullName)'s Birthday"
-            content.body = person.age.map { "Turning \($0) today!" } ?? "Don't forget to reach out!"
+            content.body = person.turningAge.map { "Turning \($0) today!" } ?? "Don't forget to reach out!"
             content.sound = .default
             content.interruptionLevel = .timeSensitive
+            content.relevanceScore = 1.0
             content.userInfo = ["personID": person.id.uuidString]
 
-            let hour = UserDefaults.standard.object(forKey: "notificationHour") as? Int ?? 9
-            let trigger = UNCalendarNotificationTrigger(
-                dateMatching: DateComponents(month: month, day: day, hour: hour, minute: 0),
-                repeats: true
-            )
+            // Fire at 00:00 on the birthday so the notification sits on the lock
+            // screen all day. If today is already their birthday (app opened after
+            // midnight), fire immediately instead — the calendar trigger would
+            // otherwise skip to next year since midnight already passed.
+            let trigger: UNNotificationTrigger
+            if person.isBirthdayToday {
+                trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
+            } else {
+                trigger = UNCalendarNotificationTrigger(
+                    dateMatching: DateComponents(month: month, day: day, hour: 0, minute: 0),
+                    repeats: true
+                )
+            }
+
             let request = UNNotificationRequest(
                 identifier: "birthday-\(person.id.uuidString)",
                 content: content,
@@ -45,8 +55,8 @@ final class NotificationService {
     }
 
     func cancelNotification(for personID: UUID) {
-        center.removePendingNotificationRequests(
-            withIdentifiers: ["birthday-\(personID.uuidString)"]
-        )
+        let id = "birthday-\(personID.uuidString)"
+        center.removePendingNotificationRequests(withIdentifiers: [id])
+        center.removeDeliveredNotifications(withIdentifiers: [id])
     }
 }

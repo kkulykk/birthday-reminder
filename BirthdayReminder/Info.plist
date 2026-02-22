@@ -48,5 +48,12 @@
 	<array>
 		<string>fetch</string>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>whatsapp</string>
+		<string>tg</string>
+		<string>viber</string>
+		<string>sgnl</string>
+	</array>
 </dict>
 </plist>

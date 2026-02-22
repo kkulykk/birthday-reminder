@@ -13,27 +13,32 @@ struct BirthdayListView: View {
     @State private var isImportingContacts = false
     @State private var importError: String?
     @State private var showImportError = false
-
-    @Namespace private var glassNamespace
+    @State private var upcomingShowCount = 5
 
     private let contactsService = ContactsService()
     private let notificationService = NotificationService()
     private let currentYear = Calendar.current.component(.year, from: Date())
 
+    // MARK: - Filtered base
+
+    var activePeople: [Person] {
+        allPeople.filter { !$0.isExcluded }
+    }
+
     // MARK: - Sections
 
     var missedYesterdayPeople: [Person] {
-        allPeople.filter { $0.isMissedYesterday }
+        activePeople.filter { $0.isMissedYesterday }
     }
 
     var todayPeople: [Person] {
-        allPeople.filter {
+        activePeople.filter {
             $0.isBirthdayToday && !$0.isCongratulatedThisYear && $0.missedYear != currentYear
         }
     }
 
     var upcomingPeople: [Person] {
-        allPeople
+        activePeople
             .filter {
                 !$0.isBirthdayToday
                 && !$0.isCongratulatedThisYear
@@ -43,42 +48,137 @@ struct BirthdayListView: View {
             .sorted { $0.nextBirthdayDate < $1.nextBirthdayDate }
     }
 
+    var visibleUpcomingPeople: [Person] {
+        Array(upcomingPeople.prefix(upcomingShowCount))
+    }
+
+    var pastPeople: [Person] {
+        activePeople
+            .filter { person in
+                let lastBdYear = Calendar.current.component(.year, from: person.lastBirthdayDate)
+                let processed = person.congratulatedYear == lastBdYear || person.missedYear == lastBdYear
+                // Include if processed this calendar year, OR within 45 days (catches Dec birthdays in Jan)
+                let isThisCalYear = lastBdYear == currentYear
+                let isRecent = person.daysSinceLastBirthday <= 45
+                return processed && (isThisCalYear || isRecent)
+            }
+            .sorted { $0.daysSinceLastBirthday < $1.daysSinceLastBirthday }
+    }
+
     // MARK: - Body
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                LazyVStack(spacing: 24, pinnedViews: []) {
-                    if allPeople.isEmpty {
-                        emptyState
-                    } else {
+            Group {
+                if allPeople.isEmpty {
+                    emptyState
+                } else {
+                    List {
+                        // Missed section
                         if !missedYesterdayPeople.isEmpty {
-                            birthdaySection(
-                                title: "Missed — Yesterday",
-                                people: missedYesterdayPeople,
-                                style: .missed
-                            )
+                            Section {
+                                ForEach(missedYesterdayPeople) { person in
+                                    NavigationLink(destination: PersonDetailView(person: person, style: .missed)) {
+                                        PersonTileView(person: person, style: .missed)
+                                    }
+                                    .swipeActions(edge: .trailing) {
+                                        excludeButton(person)
+                                    }
+                                }
+                            } header: {
+                                Label("Missed — Yesterday", systemImage: "clock.badge.exclamationmark")
+                                    .foregroundStyle(.red)
+                            }
                         }
 
+                        // Today section — swipe right to congratulate
                         if !todayPeople.isEmpty {
-                            birthdaySection(
-                                title: "Today 🎂",
-                                people: todayPeople,
-                                style: .today
-                            )
+                            Section {
+                                ForEach(todayPeople) { person in
+                                    NavigationLink(destination: PersonDetailView(person: person, style: .today)) {
+                                        PersonTileView(person: person, style: .today)
+                                    }
+                                    .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                                        Button {
+                                            markCongratulated(person)
+                                        } label: {
+                                            Label("Congrats!", systemImage: "checkmark.circle.fill")
+                                        }
+                                        .tint(.green)
+                                    }
+                                    .swipeActions(edge: .trailing) {
+                                        excludeButton(person)
+                                    }
+                                }
+                            } header: {
+                                Label("Today 🎂", systemImage: "birthday.cake.fill")
+                                    .foregroundStyle(.orange)
+                            }
                         }
 
+                        // Upcoming section — 5 at a time
                         if !upcomingPeople.isEmpty {
-                            birthdaySection(
-                                title: "Upcoming",
-                                people: upcomingPeople,
-                                style: .upcoming
-                            )
+                            Section {
+                                ForEach(visibleUpcomingPeople) { person in
+                                    NavigationLink(destination: PersonDetailView(person: person, style: .upcoming)) {
+                                        PersonTileView(person: person, style: .upcoming)
+                                    }
+                                    .swipeActions(edge: .trailing) {
+                                        excludeButton(person)
+                                    }
+                                }
+                                if upcomingPeople.count > upcomingShowCount {
+                                    Button {
+                                        upcomingShowCount += 5
+                                    } label: {
+                                        HStack {
+                                            Spacer()
+                                            Text("Show More")
+                                                .font(.subheadline.weight(.medium))
+                                            Spacer()
+                                        }
+                                    }
+                                }
+                            } header: {
+                                Label("Upcoming", systemImage: "calendar")
+                            }
+                        }
+
+                        // Past birthdays
+                        if !pastPeople.isEmpty {
+                            Section {
+                                ForEach(pastPeople) { person in
+                                    NavigationLink(destination: PersonDetailView(person: person, style: .past)) {
+                                        PersonTileView(person: person, style: .past)
+                                    }
+                                    .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                                        if person.isCongratulatedOnLastBirthday {
+                                            Button {
+                                                restorePerson(person)
+                                            } label: {
+                                                Label("Undo", systemImage: "arrow.uturn.left.circle.fill")
+                                            }
+                                            .tint(.blue)
+                                        } else {
+                                            Button {
+                                                markCongratulatedPast(person)
+                                            } label: {
+                                                Label("Congrats!", systemImage: "checkmark.circle.fill")
+                                            }
+                                            .tint(.green)
+                                        }
+                                    }
+                                    .swipeActions(edge: .trailing) {
+                                        excludeButton(person)
+                                    }
+                                }
+                            } header: {
+                                Label("Past — This Year", systemImage: "clock.arrow.trianglehead.counterclockwise.rotate.90")
+                            }
                         }
                     }
+                    .listStyle(.insetGrouped)
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 16)
             }
             .navigationTitle("Birthdays")
             .toolbar {
@@ -120,7 +220,7 @@ struct BirthdayListView: View {
                 autoMarkMissed()
                 Task {
                     _ = await notificationService.requestPermission()
-                    await notificationService.rescheduleAll(people: allPeople)
+                    await notificationService.rescheduleAll(people: activePeople)
                     if autoRefreshContacts {
                         await importContacts()
                     }
@@ -129,53 +229,14 @@ struct BirthdayListView: View {
         }
     }
 
-    // MARK: - Section Builder
+    // MARK: - Swipe Action Builder
 
     @ViewBuilder
-    private func birthdaySection(title: String, people: [Person], style: TileStyle) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Image(systemName: sectionIcon(for: style))
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(sectionColor(for: style))
-                Text(title.uppercased())
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .tracking(0.6)
-            }
-            .padding(.leading, 6)
-
-            GlassEffectContainer {
-                VStack(spacing: 0) {
-                    ForEach(Array(people.enumerated()), id: \.element.id) { index, person in
-                        NavigationLink(destination: PersonDetailView(person: person)) {
-                            PersonTileView(person: person, style: style)
-                        }
-                        .glassEffect(in: .rect(cornerRadius: 20))
-                        .glassEffectID(person.id, in: glassNamespace)
-
-                        if index < people.count - 1 {
-                            Divider().padding(.leading, 88)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private func sectionIcon(for style: TileStyle) -> String {
-        switch style {
-        case .today:   return "birthday.cake.fill"
-        case .missed:  return "clock.badge.exclamationmark"
-        case .upcoming: return "calendar"
-        }
-    }
-
-    private func sectionColor(for style: TileStyle) -> Color {
-        switch style {
-        case .today:   return .orange
-        case .missed:  return .red
-        case .upcoming: return .secondary
+    private func excludeButton(_ person: Person) -> some View {
+        Button(role: .destructive) {
+            excludePerson(person)
+        } label: {
+            Label("Exclude", systemImage: "eye.slash.fill")
         }
     }
 
@@ -216,10 +277,41 @@ struct BirthdayListView: View {
 
     // MARK: - Logic
 
+    private func markCongratulated(_ person: Person) {
+        let thisYear = Calendar.current.component(.year, from: Date())
+        person.congratulatedYear = thisYear
+        notificationService.cancelNotification(for: person.id)
+        try? modelContext.save()
+        Task {
+            await notificationService.rescheduleAll(people: activePeople)
+        }
+    }
+
+    private func markCongratulatedPast(_ person: Person) {
+        let lastBdYear = Calendar.current.component(.year, from: person.lastBirthdayDate)
+        person.congratulatedYear = lastBdYear
+        try? modelContext.save()
+    }
+
+    private func restorePerson(_ person: Person) {
+        person.congratulatedYear = nil
+        person.missedYear = nil
+        try? modelContext.save()
+        Task {
+            await notificationService.rescheduleAll(people: activePeople)
+        }
+    }
+
+    private func excludePerson(_ person: Person) {
+        person.isExcluded = true
+        notificationService.cancelNotification(for: person.id)
+        try? modelContext.save()
+    }
+
     private func autoMarkMissed() {
         let thisYear = Calendar.current.component(.year, from: Date())
         var changed = false
-        for person in allPeople where person.shouldAutoMarkMissed {
+        for person in activePeople where person.shouldAutoMarkMissed {
             person.missedYear = thisYear
             notificationService.cancelNotification(for: person.id)
             changed = true
@@ -238,29 +330,38 @@ struct BirthdayListView: View {
             guard granted else { return }
 
             let contacts = try await contactsService.fetchBirthdayContacts()
-            let existingIDs = Set(allPeople.compactMap { $0.contactIdentifier })
+
+            let existingByID = Dictionary(uniqueKeysWithValues:
+                allPeople.compactMap { p in p.contactIdentifier.map { ($0, p) } }
+            )
+
             var newPeople: [Person] = []
 
             for contact in contacts {
-                guard !existingIDs.contains(contact.identifier) else { continue }
-                let person = Person()
-                person.givenName = contact.givenName
-                person.familyName = contact.familyName
-                person.contactIdentifier = contact.identifier
-                person.birthdayMonth = contact.birthday?.month
-                person.birthdayDay = contact.birthday?.day
-                person.birthdayYear = contact.birthday?.year
-                person.phoneNumber = contact.phoneNumbers.first?.value.stringValue
-                person.email = contact.emailAddresses.first?.value as String?
-                if contact.imageDataAvailable {
-                    person.photoData = contact.thumbnailImageData
+                if let existing = existingByID[contact.identifier] {
+                    if contact.imageDataAvailable {
+                        existing.photoData = contact.thumbnailImageData
+                    }
+                } else {
+                    let person = Person()
+                    person.givenName = contact.givenName
+                    person.familyName = contact.familyName
+                    person.contactIdentifier = contact.identifier
+                    person.birthdayMonth = contact.birthday?.month
+                    person.birthdayDay = contact.birthday?.day
+                    person.birthdayYear = contact.birthday?.year
+                    person.phoneNumber = contact.phoneNumbers.first?.value.stringValue
+                    person.email = contact.emailAddresses.first?.value as String?
+                    if contact.imageDataAvailable {
+                        person.photoData = contact.thumbnailImageData
+                    }
+                    modelContext.insert(person)
+                    newPeople.append(person)
                 }
-                modelContext.insert(person)
-                newPeople.append(person)
             }
 
             try? modelContext.save()
-            await notificationService.rescheduleAll(people: allPeople + newPeople)
+            await notificationService.rescheduleAll(people: activePeople + newPeople)
         } catch {
             importError = error.localizedDescription
             showImportError = true

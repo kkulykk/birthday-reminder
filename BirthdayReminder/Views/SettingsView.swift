@@ -1,15 +1,19 @@
 import SwiftUI
+import SwiftData
 
 private enum Keys {
     static let autoRefreshContacts = "autoRefreshContacts"
-    static let notificationHour    = "notificationHour"
 }
 
 struct SettingsView: View {
     @AppStorage(Keys.autoRefreshContacts) private var autoRefreshContacts = true
-    @AppStorage(Keys.notificationHour)    private var notificationHour    = 9
 
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss)      private var dismiss
+
+    @Query(filter: #Predicate<Person> { $0.isExcluded },
+           sort: \Person.familyName)
+    private var excludedPeople: [Person]
 
     var body: some View {
         NavigationStack {
@@ -25,19 +29,42 @@ struct SettingsView: View {
                     Text("Syncs birthdays from your contacts every time you open the app. New contacts are added; existing records are not duplicated.")
                 }
 
-                // MARK: Notifications
+                // MARK: Excluded Contacts
                 Section {
-                    Picker(selection: $notificationHour) {
-                        ForEach(0..<24, id: \.self) { hour in
-                            Text(formattedHour(hour)).tag(hour)
+                    if excludedPeople.isEmpty {
+                        Text("No excluded contacts")
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                    } else {
+                        ForEach(excludedPeople) { person in
+                            HStack(spacing: 12) {
+                                AvatarView(person: person, size: 36)
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text(person.fullName)
+                                        .font(.body)
+                                    if let month = person.birthdayMonth, let day = person.birthdayDay {
+                                        Text(shortDateString(month: month, day: day))
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                                Spacer()
+                            }
+                            .swipeActions(edge: .trailing) {
+                                Button {
+                                    person.isExcluded = false
+                                    try? modelContext.save()
+                                } label: {
+                                    Label("Include", systemImage: "eye.fill")
+                                }
+                                .tint(.blue)
+                            }
                         }
-                    } label: {
-                        Label("Reminder Time", systemImage: "bell.fill")
                     }
                 } header: {
-                    Text("Notifications")
+                    Text("Excluded Contacts")
                 } footer: {
-                    Text("Birthday reminders fire at this time. Changes apply the next time the app reschedules notifications.")
+                    Text("Excluded contacts are hidden from your birthday list and won't receive reminders. Swipe left to restore.")
                 }
 
                 // MARK: About
@@ -65,15 +92,11 @@ struct SettingsView: View {
 
     // MARK: - Helpers
 
-    private func formattedHour(_ hour: Int) -> String {
-        var c = DateComponents()
-        c.hour = hour
-        c.minute = 0
-        guard let date = Calendar.current.date(from: c) else { return "\(hour):00" }
-        let f = DateFormatter()
-        f.timeStyle = .short
-        f.dateStyle = .none
-        return f.string(from: date)
+    private func shortDateString(month: Int, day: Int) -> String {
+        var c = DateComponents(); c.month = month; c.day = day; c.year = 2000
+        guard let d = Calendar.current.date(from: c) else { return "\(month)/\(day)" }
+        let f = DateFormatter(); f.dateFormat = "MMM d"
+        return f.string(from: d)
     }
 
     private var appVersion: String {
