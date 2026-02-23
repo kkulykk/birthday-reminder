@@ -1,0 +1,35 @@
+name: Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Run tests
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project BirthdayReminder.xcodeproj \
+            -scheme BirthdayReminder \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+          | xcpretty --color
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            ~/Library/Developer/Xcode/DerivedData/**/Logs/Test/*.xcresult
