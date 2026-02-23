@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		204C55D52F4B40B300B536BB /* BirthdayShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 204C55CB2F4B40B300B536BB /* BirthdayShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CC66DD77EE88FF99AABBCCDD /* BirthdayWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = CC22DD33EE44FF55AA667788 /* BirthdayWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -17,6 +18,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 204C55CA2F4B40B300B536BB;
 			remoteInfo = BirthdayShareExtension;
+		};
+		AABABBCC22DD33EE44FF5566 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 204C55972F4B367B00B536BB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 204C559E2F4B367B00B536BB;
+			remoteInfo = BirthdayReminder;
+		};
+		CC44DD55EE66FF77AA8899BB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 204C55972F4B367B00B536BB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CC11DD22EE33FF44AA556677;
+			remoteInfo = BirthdayWidget;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -32,18 +47,30 @@
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CC77DD88EE99FFAABBCCDDEE /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				CC66DD77EE88FF99AABBCCDD /* BirthdayWidget.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		204C559F2F4B367B00B536BB /* BirthdayReminder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BirthdayReminder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		204C55CB2F4B40B300B536BB /* BirthdayShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BirthdayShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA11BB22CC33DD44EE55FF66 /* BirthdayReminderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BirthdayReminderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC22DD33EE44FF55AA667788 /* BirthdayWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BirthdayWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		204C55D62F4B40B300B536BB /* Exceptions for "BirthdayShareExtension" folder in "BirthdayShareExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				BirthdayShareExtension.entitlements,
 				Info.plist,
 			);
 			target = 204C55CA2F4B40B300B536BB /* BirthdayShareExtension */;
@@ -55,6 +82,22 @@
 				ShareViewController.swift,
 			);
 			target = 204C559E2F4B367B00B536BB /* BirthdayReminder */;
+		};
+		CC00112233445566778899AA /* Exceptions for "BirthdayWidget" folder in "BirthdayWidget" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = CC11DD22EE33FF44AA556677 /* BirthdayWidget */;
+		};
+		CCEEFF00112233445566778A /* Exceptions for "Shared" folder in "BirthdayWidget" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Person.swift,
+				SharedContainer.swift,
+				WishlistItem.swift,
+			);
+			target = CC11DD22EE33FF44AA556677 /* BirthdayWidget */;
 		};
 		D5940758E7D546A19A11010F /* Exceptions for "BirthdayReminder" folder in "BirthdayReminder" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -68,6 +111,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		204C557DA4CC797DE04F24AA /* Shared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				CCEEFF00112233445566778A /* Exceptions for "Shared" folder in "BirthdayWidget" target */,
+			);
 			path = Shared;
 			sourceTree = "<group>";
 		};
@@ -88,6 +134,14 @@
 			path = BirthdayShareExtension;
 			sourceTree = "<group>";
 		};
+		CC33DD44EE55FF66AA778899 /* BirthdayWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				CC00112233445566778899AA /* Exceptions for "BirthdayWidget" folder in "BirthdayWidget" target */,
+			);
+			path = BirthdayWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +159,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA33BB44CC55DD66EE77FF88 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CCCCDD00EEFF22EE11445566 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -113,6 +181,7 @@
 			children = (
 				204C55A12F4B367B00B536BB /* BirthdayReminder */,
 				204C55CC2F4B40B300B536BB /* BirthdayShareExtension */,
+				CC33DD44EE55FF66AA778899 /* BirthdayWidget */,
 				204C557DA4CC797DE04F24AA /* Shared */,
 				204C55A02F4B367B00B536BB /* Products */,
 			);
@@ -123,6 +192,8 @@
 			children = (
 				204C559F2F4B367B00B536BB /* BirthdayReminder.app */,
 				204C55CB2F4B40B300B536BB /* BirthdayShareExtension.appex */,
+				AA11BB22CC33DD44EE55FF66 /* BirthdayReminderTests.xctest */,
+				CC22DD33EE44FF55AA667788 /* BirthdayWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -138,11 +209,13 @@
 				204C559C2F4B367B00B536BB /* Frameworks */,
 				204C559D2F4B367B00B536BB /* Resources */,
 				204C55DA2F4B40B300B536BB /* Embed Foundation Extensions */,
+				CC77DD88EE99FFAABBCCDDEE /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				204C55D42F4B40B300B536BB /* PBXTargetDependency */,
+				CC55DD66EE77FF88AA99BBCC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				204C557DA4CC797DE04F24AA /* Shared */,
@@ -178,6 +251,49 @@
 			productReference = 204C55CB2F4B40B300B536BB /* BirthdayShareExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		AA66BB77CC88DD99EEAAFFBB /* BirthdayReminderTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA99BBAACC11DD22EE33FF44 /* Build configuration list for PBXNativeTarget "BirthdayReminderTests" */;
+			buildPhases = (
+				AA55BB66CC77DD88EE99FFAA /* Sources */,
+				AA33BB44CC55DD66EE77FF88 /* Frameworks */,
+				AA44BB55CC66DD77EE88FF99 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AABBBCCC33DD44EE55FF6677 /* PBXTargetDependency */,
+			);
+			name = BirthdayReminderTests;
+			packageProductDependencies = (
+			);
+			productName = BirthdayReminderTests;
+			productReference = AA11BB22CC33DD44EE55FF66 /* BirthdayReminderTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		CC11DD22EE33FF44AA556677 /* BirthdayWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CC88DD99EEFFAABB00112233 /* Build configuration list for PBXNativeTarget "BirthdayWidget" */;
+			buildPhases = (
+				CCBBDDCCEEFF11DD00334455 /* Sources */,
+				CCCCDD00EEFF22EE11445566 /* Frameworks */,
+				CCDDEE11FF003322112233BB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				204C557DA4CC797DE04F24AA /* Shared */,
+				CC33DD44EE55FF66AA778899 /* BirthdayWidget */,
+			);
+			name = BirthdayWidget;
+			packageProductDependencies = (
+			);
+			productName = BirthdayWidget;
+			productReference = CC22DD33EE44FF55AA667788 /* BirthdayWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -192,6 +308,13 @@
 						CreatedOnToolsVersion = 26.2;
 					};
 					204C55CA2F4B40B300B536BB = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					AA66BB77CC88DD99EEAAFFBB = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 204C559E2F4B367B00B536BB;
+					};
+					CC11DD22EE33FF44AA556677 = {
 						CreatedOnToolsVersion = 26.2;
 					};
 				};
@@ -212,6 +335,8 @@
 			targets = (
 				204C559E2F4B367B00B536BB /* BirthdayReminder */,
 				204C55CA2F4B40B300B536BB /* BirthdayShareExtension */,
+				AA66BB77CC88DD99EEAAFFBB /* BirthdayReminderTests */,
+				CC11DD22EE33FF44AA556677 /* BirthdayWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -225,6 +350,20 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		204C55C92F4B40B300B536BB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA44BB55CC66DD77EE88FF99 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CCDDEE11FF003322112233BB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -248,6 +387,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA55BB66CC77DD88EE99FFAA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CCBBDDCCEEFF11DD00334455 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -255,6 +408,16 @@
 			isa = PBXTargetDependency;
 			target = 204C55CA2F4B40B300B536BB /* BirthdayShareExtension */;
 			targetProxy = 204C55D32F4B40B300B536BB /* PBXContainerItemProxy */;
+		};
+		AABBBCCC33DD44EE55FF6677 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 204C559E2F4B367B00B536BB /* BirthdayReminder */;
+			targetProxy = AABABBCC22DD33EE44FF5566 /* PBXContainerItemProxy */;
+		};
+		CC55DD66EE77FF88AA99BBCC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CC11DD22EE33FF44AA556677 /* BirthdayWidget */;
+			targetProxy = CC44DD55EE66FF77AA8899BB /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -498,6 +661,116 @@
 			};
 			name = Release;
 		};
+		AA77BB88CC99DDAAEEBB1FCC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 28JPTEDA4Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = kkulykk.BirthdayReminderTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BirthdayReminder.app/BirthdayReminder";
+			};
+			name = Debug;
+		};
+		AA88BB99CCAADDBBEECCFFDD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 28JPTEDA4Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = kkulykk.BirthdayReminderTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BirthdayReminder.app/BirthdayReminder";
+			};
+			name = Release;
+		};
+		CC99DDAAEEFFBB00CC112233 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BirthdayWidget/BirthdayWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 28JPTEDA4Z;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BirthdayWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = kkulykk.BirthdayReminder.BirthdayWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CCAADDBBEEFF00CCDD223344 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BirthdayWidget/BirthdayWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 28JPTEDA4Z;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BirthdayWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = kkulykk.BirthdayReminder.BirthdayWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -524,6 +797,24 @@
 			buildConfigurations = (
 				204C55D82F4B40B300B536BB /* Debug */,
 				204C55D92F4B40B300B536BB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA99BBAACC11DD22EE33FF44 /* Build configuration list for PBXNativeTarget "BirthdayReminderTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA77BB88CC99DDAAEEBB1FCC /* Debug */,
+				AA88BB99CCAADDBBEECCFFDD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CC88DD99EEFFAABB00112233 /* Build configuration list for PBXNativeTarget "BirthdayWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CC99DDAAEEFFBB00CC112233 /* Debug */,
+				CCAADDBBEEFF00CCDD223344 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
