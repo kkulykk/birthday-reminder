@@ -117,6 +117,11 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
+		AA22BB33CC44DD55EE66FF77 /* BirthdayReminderTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = BirthdayReminderTests;
+			sourceTree = "<group>";
+		};
 		204C55A12F4B367B00B536BB /* BirthdayReminder */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -183,6 +188,7 @@
 				204C55CC2F4B40B300B536BB /* BirthdayShareExtension */,
 				CC33DD44EE55FF66AA778899 /* BirthdayWidget */,
 				204C557DA4CC797DE04F24AA /* Shared */,
+				AA22BB33CC44DD55EE66FF77 /* BirthdayReminderTests */,
 				204C55A02F4B367B00B536BB /* Products */,
 			);
 			sourceTree = "<group>";
@@ -201,6 +207,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		AA66BB77CC88DD99EEAAFFBB /* BirthdayReminderTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA99BBAACC11DD22EE33FF44 /* Build configuration list for PBXNativeTarget "BirthdayReminderTests" */;
+			buildPhases = (
+				AA55BB66CC77DD88EE99FFAA /* Sources */,
+				AA33BB44CC55DD66EE77FF88 /* Frameworks */,
+				AA44BB55CC66DD77EE88FF99 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AABBBCCC33DD44EE55FF6677 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				AA22BB33CC44DD55EE66FF77 /* BirthdayReminderTests */,
+			);
+			name = BirthdayReminderTests;
+			packageProductDependencies = (
+			);
+			productName = BirthdayReminderTests;
+			productReference = AA11BB22CC33DD44EE55FF66 /* BirthdayReminderTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		204C559E2F4B367B00B536BB /* BirthdayReminder */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 204C55AA2F4B367C00B536BB /* Build configuration list for PBXNativeTarget "BirthdayReminder" */;
