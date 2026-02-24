@@ -9,7 +9,6 @@ struct SettingsView: View {
     @AppStorage(Keys.autoRefreshContacts) private var autoRefreshContacts = true
 
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss)      private var dismiss
 
     @Query(filter: #Predicate<Person> { $0.isExcluded },
            sort: \Person.familyName)
@@ -81,12 +80,6 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
-                        .fontWeight(.semibold)
-                }
-            }
         }
     }
 

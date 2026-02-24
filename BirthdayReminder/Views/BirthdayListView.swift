@@ -9,7 +9,6 @@ struct BirthdayListView: View {
     @AppStorage("autoRefreshContacts") private var autoRefreshContacts = true
 
     @State private var showAddPerson = false
-    @State private var showSettings = false
     @State private var isImportingContacts = false
     @State private var importError: String?
     @State private var showImportError = false
@@ -199,17 +198,9 @@ struct BirthdayListView: View {
                     }
                     .disabled(isImportingContacts)
                 }
-                ToolbarItem(placement: .topBarLeading) {
-                    Button { showSettings = true } label: {
-                        Image(systemName: "gearshape")
-                    }
-                }
             }
             .sheet(isPresented: $showAddPerson) {
                 AddPersonView()
-            }
-            .sheet(isPresented: $showSettings) {
-                SettingsView()
             }
             .alert("Import Failed", isPresented: $showImportError) {
                 Button("OK", role: .cancel) {}
