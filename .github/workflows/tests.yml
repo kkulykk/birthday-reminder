@@ -1,14 +1,13 @@
 name: Tests
 
 on:
+  merge_group:
+    branches: [main]
   workflow_dispatch:
-  pull_request:
-    types: [labeled]
 
 jobs:
   test:
     name: Run Tests
-    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'run-tests'
     runs-on: macos-latest
 
     steps:
