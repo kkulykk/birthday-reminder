@@ -1,16 +1,22 @@
 name: Tests
 
 on:
+  pull_request:
+    types: [labeled]
   workflow_dispatch:
 
 jobs:
   test:
     name: Run Tests
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'tested'
     runs-on: macos-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Select Xcode 26.2
+        run: sudo xcode-select -s /Applications/Xcode_26.2.app
 
       - name: Show Xcode version
         run: xcodebuild -version
