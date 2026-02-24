@@ -12,8 +12,8 @@ final class PersonTests: XCTestCase {
     override func setUpWithError() throws {
         try super.setUpWithError()
         let schema = Schema([Person.self, WishlistItem.self])
-        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-        container = try ModelContainer(schema: schema, configurations: [config])
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        container = try ModelContainer(for: schema, configurations: [config])
         context = ModelContext(container)
     }
 
