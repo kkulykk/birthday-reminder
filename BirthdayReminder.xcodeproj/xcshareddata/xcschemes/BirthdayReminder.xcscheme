@@ -34,6 +34,20 @@
                ReferencedContainer = "container:BirthdayReminder.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "CC11DD22EE33FF44AA556677"
+               BuildableName = "BirthdayWidget.appex"
+               BlueprintName = "BirthdayWidget"
+               ReferencedContainer = "container:BirthdayReminder.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction

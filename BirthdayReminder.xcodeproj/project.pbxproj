@@ -280,26 +280,6 @@
 			productReference = 204C55CB2F4B40B300B536BB /* BirthdayShareExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		AA66BB77CC88DD99EEAAFFBB /* BirthdayReminderTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = AA99BBAACC11DD22EE33FF44 /* Build configuration list for PBXNativeTarget "BirthdayReminderTests" */;
-			buildPhases = (
-				AA55BB66CC77DD88EE99FFAA /* Sources */,
-				AA33BB44CC55DD66EE77FF88 /* Frameworks */,
-				AA44BB55CC66DD77EE88FF99 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				AABBBCCC33DD44EE55FF6677 /* PBXTargetDependency */,
-			);
-			name = BirthdayReminderTests;
-			packageProductDependencies = (
-			);
-			productName = BirthdayReminderTests;
-			productReference = AA11BB22CC33DD44EE55FF66 /* BirthdayReminderTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		CC11DD22EE33FF44AA556677 /* BirthdayWidget */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CC88DD99EEFFAABB00112233 /* Build configuration list for PBXNativeTarget "BirthdayWidget" */;
