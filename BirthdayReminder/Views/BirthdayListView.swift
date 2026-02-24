@@ -330,6 +330,9 @@ struct BirthdayListView: View {
 
             for contact in contacts {
                 if let existing = existingByID[contact.identifier] {
+                    existing.birthdayMonth = contact.birthday?.month
+                    existing.birthdayDay = contact.birthday?.day
+                    existing.birthdayYear = contact.birthday?.year
                     if contact.imageDataAvailable {
                         existing.photoData = contact.thumbnailImageData
                     }
