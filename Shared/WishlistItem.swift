@@ -14,5 +14,10 @@ final class WishlistItem {
 
     init() {}
 
-    var url: URL? { urlString.flatMap { URL(string: $0) } }
+    var url: URL? {
+        guard let string = urlString,
+              let url = URL(string: string),
+              url.scheme != nil else { return nil }
+        return url
+    }
 }
