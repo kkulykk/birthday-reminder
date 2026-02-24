@@ -87,7 +87,7 @@ Share Ext    → opens same SwiftData store via App Group URL
 - **`ContentView.swift`** → **`BirthdayListView.swift`** — Root view. Displays four sections: Missed Yesterday, Today, Upcoming (paginated 5 at a time), Past This Year.
 - **`Views/PersonDetailView.swift`** — Detail view; renders differently based on `style` (`.today`, `.upcoming`, `.past`, `.missed`).
 - **`Services/NotificationService.swift`** — Schedules up to 64 `UNCalendarNotificationTrigger` notifications. Uses `UNTimeIntervalNotificationTrigger(timeInterval: 2)` when the birthday is today (calendar trigger would skip to next year).
-- **`Services/ContactsService.swift`** — Fetches `CNContact` records that have a birthday set. Import merges by `contactIdentifier`; existing records only update photo data.
+- **`Services/ContactsService.swift`** — Fetches `CNContact` records that have a birthday set. Import merges by `contactIdentifier`; existing records update birthday fields and photo data.
 
 ### Widget Extension
 
