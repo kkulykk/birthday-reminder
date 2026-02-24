@@ -16,6 +16,18 @@ final class ContactsService {
         }
     }
 
+    /// Syncs birthday and photo fields from a CNContact onto an existing Person.
+    /// Called during import for contacts that are already in the store.
+    @MainActor
+    static func applyContactFields(_ contact: CNContact, to person: Person) {
+        person.birthdayMonth = contact.birthday?.month
+        person.birthdayDay = contact.birthday?.day
+        person.birthdayYear = contact.birthday?.year
+        if contact.imageDataAvailable {
+            person.photoData = contact.thumbnailImageData
+        }
+    }
+
     func fetchBirthdayContacts() async throws -> [CNContact] {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
