@@ -1,9 +1,27 @@
 import XCTest
+import SwiftData
 @testable import BirthdayReminder
 
 final class PersonTests: XCTestCase {
 
     // MARK: - Helpers
+
+    private var container: ModelContainer!
+    private var context: ModelContext!
+
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        let schema = Schema([Person.self, WishlistItem.self])
+        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+        container = try ModelContainer(schema: schema, configurations: [config])
+        context = ModelContext(container)
+    }
+
+    override func tearDownWithError() throws {
+        context = nil
+        container = nil
+        try super.tearDownWithError()
+    }
 
     private func makePerson(
         given: String = "",
@@ -22,6 +40,7 @@ final class PersonTests: XCTestCase {
         p.birthdayYear = year
         p.congratulatedYear = congratulatedYear
         p.missedYear = missedYear
+        context.insert(p)
         return p
     }
 
