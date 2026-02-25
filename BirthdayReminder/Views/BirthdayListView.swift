@@ -2,6 +2,31 @@ import SwiftUI
 import SwiftData
 import Contacts
 
+// MARK: - Logic (testable)
+
+enum BirthdayListLogic {
+
+    /// Filters `people` by a case-insensitive full-name query.
+    /// An empty query returns `people` unchanged (and unsorted).
+    /// A non-empty query returns only matches, sorted by next birthday.
+    static func filterByQuery(_ query: String, from people: [Person]) -> [Person] {
+        guard !query.isEmpty else { return people }
+        return people
+            .filter { $0.fullName.localizedCaseInsensitiveContains(query) }
+            .sorted { $0.nextBirthdayDate < $1.nextBirthdayDate }
+    }
+
+    /// Determines the appropriate tile style for a person based on their birthday state.
+    static func tileStyle(for person: Person) -> TileStyle {
+        if person.isBirthdayToday { return .today }
+        if person.isMissedYesterday { return .missed }
+        if (person.daysSinceBirthday ?? -1) > 0 { return .past }
+        return .upcoming
+    }
+}
+
+// MARK: - View
+
 struct BirthdayListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var allPeople: [Person]
@@ -13,6 +38,7 @@ struct BirthdayListView: View {
     @State private var importError: String?
     @State private var showImportError = false
     @State private var upcomingShowCount = 5
+    @State private var searchQuery = ""
 
     private let contactsService = ContactsService()
     private let notificationService = NotificationService()
@@ -22,6 +48,10 @@ struct BirthdayListView: View {
 
     var activePeople: [Person] {
         allPeople.filter { !$0.isExcluded }
+    }
+
+    var searchResults: [Person] {
+        BirthdayListLogic.filterByQuery(searchQuery, from: activePeople)
     }
 
     // MARK: - Sections
@@ -71,6 +101,8 @@ struct BirthdayListView: View {
             Group {
                 if allPeople.isEmpty {
                     emptyState
+                } else if !searchQuery.isEmpty {
+                    searchResultsContent
                 } else {
                     List {
                         // Missed section
@@ -180,6 +212,7 @@ struct BirthdayListView: View {
                 }
             }
             .navigationTitle("Birthdays")
+            .searchable(text: $searchQuery, prompt: "Search people")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button { showAddPerson = true } label: {
@@ -264,6 +297,42 @@ struct BirthdayListView: View {
         }
         .padding(.vertical, 64)
         .padding(.horizontal, 32)
+    }
+
+    // MARK: - Search Results
+
+    @ViewBuilder
+    private var searchResultsContent: some View {
+        if searchResults.isEmpty {
+            VStack(spacing: 16) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 40))
+                    .foregroundStyle(.secondary)
+                Text("No results for "\(searchQuery)"")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.vertical, 64)
+            .padding(.horizontal, 32)
+        } else {
+            List {
+                Section {
+                    ForEach(searchResults) { person in
+                        let style = BirthdayListLogic.tileStyle(for: person)
+                        NavigationLink(destination: PersonDetailView(person: person, style: style)) {
+                            PersonTileView(person: person, style: style)
+                        }
+                        .swipeActions(edge: .trailing) {
+                            excludeButton(person)
+                        }
+                    }
+                } header: {
+                    Text("\(searchResults.count) result\(searchResults.count == 1 ? "" : "s")")
+                }
+            }
+            .listStyle(.insetGrouped)
+        }
     }
 
     // MARK: - Logic
