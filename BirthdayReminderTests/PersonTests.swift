@@ -227,6 +227,13 @@ final class PersonTests: XCTestCase {
 
     // MARK: - daysUntilBirthday
 
+    func testDaysUntilBirthday_noBirthday_isNonNegative() {
+        // .distantFuture is the nextBirthdayDate when no birthday is set;
+        // the result may be very large or 0 (if Calendar returns nil), but never negative.
+        let p = makePerson()
+        XCTAssertGreaterThanOrEqual(p.daysUntilBirthday, 0)
+    }
+
     func testDaysUntilBirthday_todayIsZero() {
         let cal = Calendar.current
         let today = cal.dateComponents([.month, .day], from: Date())
@@ -437,6 +444,53 @@ final class PersonTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(nextYear, thisYear)
     }
 
+    // MARK: - daysSinceLastBirthday
+
+    func testDaysSinceLastBirthday_todayIsZero() {
+        let cal = Calendar.current
+        let today = cal.dateComponents([.month, .day], from: Date())
+        let p = makePerson(month: today.month, day: today.day)
+        XCTAssertEqual(p.daysSinceLastBirthday, 0)
+    }
+
+    func testDaysSinceLastBirthday_yesterdayIsOne() {
+        let cal = Calendar.current
+        // Skip on Jan 1 where yesterday (Dec 31) is from last year
+        guard cal.ordinality(of: .day, in: .year, for: Date()) ?? 1 > 1 else { return }
+
+        let yesterday = cal.date(byAdding: .day, value: -1, to: Date())!
+        let comps = cal.dateComponents([.month, .day], from: yesterday)
+        let p = makePerson(month: comps.month, day: comps.day)
+        XCTAssertEqual(p.daysSinceLastBirthday, 1)
+    }
+
+    func testDaysSinceLastBirthday_twoDaysAgoIsTwo() {
+        let cal = Calendar.current
+        // Skip on Jan 1-2 where two days ago crosses the year boundary
+        guard cal.ordinality(of: .day, in: .year, for: Date()) ?? 1 > 2 else { return }
+
+        let twoDaysAgo = cal.date(byAdding: .day, value: -2, to: Date())!
+        let comps = cal.dateComponents([.month, .day], from: twoDaysAgo)
+        let p = makePerson(month: comps.month, day: comps.day)
+        XCTAssertEqual(p.daysSinceLastBirthday, 2)
+    }
+
+    func testDaysSinceLastBirthday_futureBirthday_isPositive() {
+        // Birthday hasn't occurred yet this year, so lastBirthdayDate is last year's occurrence.
+        // daysSinceLastBirthday should be > 0 (approximately 364–365 days).
+        let cal = Calendar.current
+        let tomorrow = cal.date(byAdding: .day, value: 1, to: Date())!
+        let comps = cal.dateComponents([.month, .day], from: tomorrow)
+        let p = makePerson(month: comps.month, day: comps.day)
+        XCTAssertGreaterThan(p.daysSinceLastBirthday, 0)
+    }
+
+    func testDaysSinceLastBirthday_noBirthday_isNonNegative() {
+        // lastBirthdayDate returns .distantPast; the computed distance is non-negative.
+        let p = makePerson()
+        XCTAssertGreaterThanOrEqual(p.daysSinceLastBirthday, 0)
+    }
+
     // MARK: - lastBirthdayDate
 
     func testLastBirthdayDate_noBirthday_returnsDistantPast() {
@@ -459,6 +513,21 @@ final class PersonTests: XCTestCase {
         let comps = cal.dateComponents([.month, .day], from: yesterday)
         let p = makePerson(month: comps.month, day: comps.day)
         XCTAssertLessThanOrEqual(p.lastBirthdayDate, Date())
+    }
+
+    func testLastBirthdayDate_futureBirthday_returnsLastYear() {
+        let cal = Calendar.current
+        let today = cal.dateComponents([.month, .day], from: Date())
+        // Skip on Dec 31: tomorrow wraps to Jan 1, which has already passed this year
+        // so lastBirthdayDate would correctly return this year's Jan 1, not last year's.
+        guard !(today.month == 12 && today.day == 31) else { return }
+
+        let tomorrow = cal.date(byAdding: .day, value: 1, to: Date())!
+        let comps = cal.dateComponents([.month, .day], from: tomorrow)
+        let p = makePerson(month: comps.month, day: comps.day)
+        let lastBirthdayYear = cal.component(.year, from: p.lastBirthdayDate)
+        let thisYear = cal.component(.year, from: Date())
+        XCTAssertEqual(lastBirthdayYear, thisYear - 1)
     }
 
     // MARK: - isExcluded
