@@ -308,7 +308,7 @@ struct BirthdayListView: View {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 40))
                     .foregroundStyle(.secondary)
-                Text("No results for "\(searchQuery)"")
+                Text("No results for \"\(searchQuery)\"")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
