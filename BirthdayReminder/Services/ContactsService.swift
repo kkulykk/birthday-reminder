@@ -31,8 +31,11 @@ final class ContactsService {
         }
     }
 
-    /// Syncs birthday and photo fields from a CNContact onto an existing Person.
+    /// Syncs birthday, name, photo, and contact fields from a CNContact onto an existing Person.
     /// Called during import for contacts that are already in the store.
+    ///
+    /// Name is only updated when the contact has a non-empty given or family name,
+    /// so manually edited names without a backing contact value are preserved.
     @MainActor
     static func applyContactFields(_ contact: CNContact, to person: Person) {
         person.birthdayMonth = contact.birthday?.month
@@ -40,6 +43,11 @@ final class ContactsService {
         person.birthdayYear = contact.birthday?.year
         if contact.imageDataAvailable {
             person.photoData = contact.thumbnailImageData
+        }
+        // Sync name when the contact carries one; avoids overwriting with empty strings.
+        if !contact.givenName.isEmpty || !contact.familyName.isEmpty {
+            person.givenName = contact.givenName
+            person.familyName = contact.familyName
         }
     }
 

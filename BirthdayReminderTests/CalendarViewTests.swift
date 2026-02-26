@@ -189,4 +189,45 @@ final class CalendarViewTests: XCTestCase {
         let result = CalendarViewLogic.birthdayPeople(inMonth: 1, onDay: 1, from: [p])
         XCTAssertTrue(result.isEmpty)
     }
+
+    // MARK: - swipeDirection (issue #12)
+
+    func testSwipeDirection_largeNegativeTranslation_returnsForward() {
+        XCTAssertEqual(CalendarViewLogic.swipeDirection(from: -100), .forward)
+    }
+
+    func testSwipeDirection_largePositiveTranslation_returnsBackward() {
+        XCTAssertEqual(CalendarViewLogic.swipeDirection(from: 100), .backward)
+    }
+
+    func testSwipeDirection_smallNegativeTranslation_returnsNone() {
+        XCTAssertEqual(CalendarViewLogic.swipeDirection(from: -30), .none)
+    }
+
+    func testSwipeDirection_smallPositiveTranslation_returnsNone() {
+        XCTAssertEqual(CalendarViewLogic.swipeDirection(from: 30), .none)
+    }
+
+    func testSwipeDirection_exactlyAtThreshold_returnsNone() {
+        // translation == -50 is NOT < -50 so should be .none
+        XCTAssertEqual(CalendarViewLogic.swipeDirection(from: -50), .none)
+        XCTAssertEqual(CalendarViewLogic.swipeDirection(from: 50), .none)
+    }
+
+    func testSwipeDirection_justBeyondThreshold_returnsDirectional() {
+        XCTAssertEqual(CalendarViewLogic.swipeDirection(from: -51), .forward)
+        XCTAssertEqual(CalendarViewLogic.swipeDirection(from: 51), .backward)
+    }
+
+    func testSwipeDirection_zeroTranslation_returnsNone() {
+        XCTAssertEqual(CalendarViewLogic.swipeDirection(from: 0), .none)
+    }
+
+    func testSwipeDirection_customThreshold_forward() {
+        XCTAssertEqual(CalendarViewLogic.swipeDirection(from: -101, threshold: 100), .forward)
+    }
+
+    func testSwipeDirection_customThreshold_tooSmall_returnsNone() {
+        XCTAssertEqual(CalendarViewLogic.swipeDirection(from: -99, threshold: 100), .none)
+    }
 }

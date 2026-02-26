@@ -17,6 +17,43 @@ private enum KeyStatus: Equatable {
     case invalid(String)
 }
 
+// MARK: - SettingsViewLogic (testable pure helpers)
+
+enum SettingsViewLogic {
+    /// Formats a month/day pair as a short date string (e.g. "Mar 8").
+    static func shortDateString(month: Int, day: Int) -> String {
+        var c = DateComponents(); c.month = month; c.day = day; c.year = 2000
+        guard let d = Calendar.current.date(from: c) else { return "\(month)/\(day)" }
+        let f = DateFormatter(); f.dateFormat = "MMM d"
+        return f.string(from: d)
+    }
+
+    /// Returns a short, user-readable description of an API key validation error.
+    static func shortValidationError(_ error: Error) -> String {
+        if let e = error as? AnthropicError {
+            switch e {
+            case .invalidAPIKey: return "Invalid API key"
+            case .networkError: return "Network error — check your connection"
+            case .apiError(let msg): return msg
+            case .parsingError: return "Unexpected response"
+            }
+        }
+        if let e = error as? OpenAIError {
+            switch e {
+            case .invalidAPIKey: return "Invalid API key"
+            case .networkError: return "Network error — check your connection"
+            case .apiError(let msg): return msg
+            case .parsingError: return "Unexpected response"
+            }
+        }
+        return error.localizedDescription
+    }
+}
+
+// MARK: - SettingsView
+
+private enum APIKeyField: Hashable { case anthropic, openai }
+
 struct SettingsView: View {
     @AppStorage(Keys.autoRefreshContacts) private var autoRefreshContacts = true
     @AppStorage(Keys.anthropicAPIKey) private var anthropicAPIKey = ""
@@ -27,6 +64,7 @@ struct SettingsView: View {
 
     @State private var anthropicKeyStatus: KeyStatus = .idle
     @State private var openAIKeyStatus: KeyStatus = .idle
+    @FocusState private var focusedField: APIKeyField?
 
     private var currentKeyStatus: KeyStatus {
         aiProvider == "openai" ? openAIKeyStatus : anthropicKeyStatus
@@ -70,7 +108,7 @@ struct SettingsView: View {
                                     Text(person.fullName)
                                         .font(.body)
                                     if let month = person.birthdayMonth, let day = person.birthdayDay {
-                                        Text(shortDateString(month: month, day: day))
+                                        Text(SettingsViewLogic.shortDateString(month: month, day: day))
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
                                     }
@@ -110,12 +148,14 @@ struct SettingsView: View {
                             SecureField("Paste your Anthropic API key...", text: $anthropicAPIKey)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
+                                .focused($focusedField, equals: .anthropic)
                                 .onSubmit { validateCurrentKey() }
                                 .onChange(of: anthropicAPIKey) { anthropicKeyStatus = .idle }
                         } else {
                             SecureField("Paste your OpenAI API key...", text: $openAIAPIKey)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
+                                .focused($focusedField, equals: .openai)
                                 .onSubmit { validateCurrentKey() }
                                 .onChange(of: openAIAPIKey) { openAIKeyStatus = .idle }
                         }
@@ -145,6 +185,13 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                // Keyboard toolbar — "Done" dismisses the API key field
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") { focusedField = nil }
+                }
+            }
         }
     }
 
@@ -208,7 +255,7 @@ struct SettingsView: View {
                 if aiProvider == provider { setKeyStatus(.valid, for: provider) }
             } catch {
                 if aiProvider == provider {
-                    setKeyStatus(.invalid(shortValidationError(error)), for: provider)
+                    setKeyStatus(.invalid(SettingsViewLogic.shortValidationError(error)), for: provider)
                 }
             }
         }
@@ -222,34 +269,7 @@ struct SettingsView: View {
         }
     }
 
-    private func shortValidationError(_ error: Error) -> String {
-        if let e = error as? AnthropicError {
-            switch e {
-            case .invalidAPIKey: return "Invalid API key"
-            case .networkError: return "Network error — check your connection"
-            case .apiError(let msg): return msg
-            case .parsingError: return "Unexpected response"
-            }
-        }
-        if let e = error as? OpenAIError {
-            switch e {
-            case .invalidAPIKey: return "Invalid API key"
-            case .networkError: return "Network error — check your connection"
-            case .apiError(let msg): return msg
-            case .parsingError: return "Unexpected response"
-            }
-        }
-        return error.localizedDescription
-    }
-
     // MARK: - Helpers
-
-    private func shortDateString(month: Int, day: Int) -> String {
-        var c = DateComponents(); c.month = month; c.day = day; c.year = 2000
-        guard let d = Calendar.current.date(from: c) else { return "\(month)/\(day)" }
-        let f = DateFormatter(); f.dateFormat = "MMM d"
-        return f.string(from: d)
-    }
 
     private var appVersion: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
