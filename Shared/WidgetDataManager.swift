@@ -25,4 +25,35 @@ enum WidgetDataManager {
         else { return [] }
         return birthdays
     }
+
+    // MARK: - Widget display helpers (shared + testable)
+
+    /// Returns the section header label for the rectangular widget.
+    /// Shows "Birthday" for today's birthdays, "Upcoming" for future ones,
+    /// and "None this week" when there are none.
+    static func widgetSectionLabel(nearest: [WidgetBirthday]) -> String {
+        if nearest.isEmpty { return "None this week" }
+        if nearest.first?.isBirthdayToday == true { return "Birthday" }
+        return "Upcoming"
+    }
+
+    /// Projects stored birthday data forward by `dayOffset` days.
+    /// Used to pre-build multiple timeline entries so the widget stays
+    /// accurate without needing the app to be in the foreground.
+    ///
+    /// - Returns birthdays with adjusted `daysUntil`, filtered to the
+    ///   7-day window relevant for the given offset day.
+    static func adjustedBirthdays(from stored: [WidgetBirthday], dayOffset: Int) -> [WidgetBirthday] {
+        stored.compactMap { birthday -> WidgetBirthday? in
+            let adjustedDays = birthday.daysUntil - dayOffset
+            guard adjustedDays >= 0 && adjustedDays <= 7 else { return nil }
+            return WidgetBirthday(
+                id: birthday.id,
+                name: birthday.name,
+                daysUntil: adjustedDays,
+                isBirthdayToday: adjustedDays == 0,
+                monthDay: birthday.monthDay
+            )
+        }
+    }
 }
