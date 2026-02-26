@@ -37,6 +37,16 @@ enum CalendarViewLogic {
         calendar.date(byAdding: .month, value: -1, to: date) ?? date
     }
 
+    enum SwipeDirection { case forward, backward, none }
+
+    /// Maps a horizontal drag translation to a navigation direction.
+    /// A negative translation (left swipe) moves forward; positive moves backward.
+    static func swipeDirection(from translation: CGFloat, threshold: CGFloat = 50) -> SwipeDirection {
+        if translation < -threshold { return .forward }
+        if translation > threshold { return .backward }
+        return .none
+    }
+
     /// Returns non-excluded people with a birthday on the given month/day.
     static func birthdayPeople(inMonth month: Int, onDay day: Int, from people: [Person]) -> [Person] {
         people.filter { p in
@@ -94,6 +104,21 @@ struct CalendarView: View {
                         }
                     }
                 }
+                .gesture(
+                    DragGesture()
+                        .onEnded { value in
+                            switch CalendarViewLogic.swipeDirection(from: value.translation.width) {
+                            case .forward:
+                                displayedMonth = CalendarViewLogic.nextMonth(displayedMonth)
+                                selectedDay = nil
+                            case .backward:
+                                displayedMonth = CalendarViewLogic.previousMonth(displayedMonth)
+                                selectedDay = nil
+                            case .none:
+                                break
+                            }
+                        }
+                )
                 .padding(.horizontal, 4)
 
                 Divider()

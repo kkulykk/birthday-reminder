@@ -1,13 +1,14 @@
 import Foundation
 import SwiftData
 
-func makeSharedModelContainer() -> ModelContainer {
+func makeSharedModelContainer(
+    groupURL: URL? = FileManager.default
+        .containerURL(forSecurityApplicationGroupIdentifier: "group.kkulykk.BirthdayReminder")?
+        .appending(path: "BirthdayReminder.store")
+) -> ModelContainer {
     let schema = Schema([Person.self, WishlistItem.self])
-    let groupID = "group.kkulykk.BirthdayReminder"
 
-    if let groupURL = FileManager.default
-        .containerURL(forSecurityApplicationGroupIdentifier: groupID)?
-        .appending(path: "BirthdayReminder.store") {
+    if let groupURL {
         let config = ModelConfiguration(schema: schema, url: groupURL)
         if let container = try? ModelContainer(for: schema, configurations: [config]) {
             return container

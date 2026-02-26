@@ -28,8 +28,10 @@ struct BirthdayReminderApp: App {
     private func updateWidgetData(people: [Person]) {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d"
+        // Store 14 days so the widget's 7 pre-built daily entries always have
+        // data for birthdays that enter the 7-day window during the week.
         let upcoming = people
-            .filter { $0.birthdayMonth != nil && $0.birthdayDay != nil && !$0.isExcluded && $0.daysUntilBirthday <= 7 }
+            .filter { $0.birthdayMonth != nil && $0.birthdayDay != nil && !$0.isExcluded && $0.daysUntilBirthday <= 14 }
             .sorted { $0.nextBirthdayDate < $1.nextBirthdayDate }
             .map { person in
                 WidgetBirthday(
