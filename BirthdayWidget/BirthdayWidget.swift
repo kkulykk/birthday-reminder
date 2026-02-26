@@ -31,10 +31,25 @@ struct BirthdayProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<BirthdayEntry>) -> Void) {
-        let entry = BirthdayEntry(date: Date(), upcomingBirthdays: WidgetDataManager.load())
-        // Refresh at next midnight so day counts stay accurate
-        let midnight = Calendar.current.startOfDay(for: Date()).addingTimeInterval(86400)
-        let timeline = Timeline(entries: [entry], policy: .after(midnight))
+        let stored = WidgetDataManager.load()
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        // Generate one entry per day for 7 days so daysUntil counts stay correct
+        // without needing the app to be in the foreground.
+        var entries: [BirthdayEntry] = []
+        for offset in 0..<7 {
+            guard let entryDate = calendar.date(byAdding: .day, value: offset, to: today) else { continue }
+            let upcoming = WidgetDataManager.adjustedBirthdays(from: stored, dayOffset: offset)
+            entries.append(BirthdayEntry(date: entryDate, upcomingBirthdays: upcoming))
+        }
+        if entries.isEmpty {
+            entries = [BirthdayEntry(date: today, upcomingBirthdays: [])]
+        }
+
+        // After 7 days the stored data is too stale; the app should have refreshed it by then.
+        let afterWeek = calendar.date(byAdding: .day, value: 7, to: today) ?? today
+        let timeline = Timeline(entries: entries, policy: .after(afterWeek))
         completion(timeline)
     }
 }
@@ -130,7 +145,7 @@ struct AccessoryRectangularView: View {
                 Image(systemName: "birthday.cake.fill")
                     .font(.caption2)
                     .foregroundStyle(Color.accentColor)
-                Text(nearest.isEmpty ? "None this week" : "Upcoming")
+                Text(WidgetDataManager.widgetSectionLabel(nearest: nearest))
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(.secondary)
             }

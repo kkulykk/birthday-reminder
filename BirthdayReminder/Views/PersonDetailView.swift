@@ -78,9 +78,23 @@ struct PersonDetailView: View {
 
     @Environment(\.modelContext) private var modelContext
 
+    @AppStorage("anthropicAPIKey") private var anthropicAPIKey = ""
+    @AppStorage("anthropicCustomPrompt") private var anthropicCustomPrompt = ""
+    @AppStorage("openAIAPIKey") private var openAIAPIKey = ""
+    @AppStorage("aiProvider") private var aiProvider = "anthropic"
+    @AppStorage("aiEnabled") private var aiEnabled = false
+
+    private var activeAPIKey: String {
+        aiProvider == "openai" ? openAIAPIKey : anthropicAPIKey
+    }
+
     @State private var showMessage = false
     @State private var showCallConfirm = false
     @State private var showMessagingPicker = false
+    @State private var showAISheet = false
+    @State private var generatedMessage = ""
+    @State private var isGenerating = false
+    @State private var aiError: String? = nil
 
     private let canSendText = MFMessageComposeViewController.canSendText()
     private let notificationService = NotificationService()
@@ -144,6 +158,65 @@ struct PersonDetailView: View {
                 Button("Call \(phone)") { makeCall(phone: phone) }
             }
             Button("Cancel", role: .cancel) {}
+        }
+        .sheet(isPresented: $showAISheet) {
+            aiSheet
+        }
+    }
+
+    // MARK: - AI Sheet
+
+    private var aiSheet: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    if isGenerating {
+                        HStack {
+                            Spacer()
+                            ProgressView("Generating...")
+                                .padding(.vertical, 40)
+                            Spacer()
+                        }
+                    } else {
+                        TextEditor(text: $generatedMessage)
+                            .frame(minHeight: 120)
+                            .padding(8)
+                            .background(.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
+
+                        if let error = aiError {
+                            Text(error)
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                                .padding(.horizontal, 4)
+                        }
+
+                        if !generatedMessage.isEmpty {
+                            ShareActivityButton(text: generatedMessage) {
+                                Label("Share", systemImage: "square.and.arrow.up")
+                                    .font(.headline)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                            }
+                            .glassEffect(in: .rect(cornerRadius: 16))
+                        }
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("AI Congratulation")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showAISheet = false
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.secondary)
+                            .font(.title3)
+                    }
+                }
+            }
         }
     }
 
@@ -306,8 +379,57 @@ struct PersonDetailView: View {
                 .foregroundStyle(isConsideredCongratulated ? .green : .primary)
             }
             .glassEffect(in: .rect(cornerRadius: 16))
+
+            if aiEnabled && !activeAPIKey.isEmpty {
+                Button { generateCongratulation() } label: {
+                    HStack {
+                        Image(systemName: "sparkles")
+                            .symbolRenderingMode(.hierarchical)
+                            .font(.title3)
+                        Text("Generate Congratulation with AI")
+                            .font(.headline)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+                    .foregroundStyle(.purple)
+                }
+                .glassEffect(in: .rect(cornerRadius: 16))
+            }
         }
         .padding(.horizontal)
+    }
+
+    // MARK: - AI Generation
+
+    private func generateCongratulation() {
+        isGenerating = true
+        aiError = nil
+        generatedMessage = ""
+        showAISheet = true
+        let customPrompt = anthropicCustomPrompt.isEmpty ? nil : anthropicCustomPrompt
+        Task {
+            do {
+                if aiProvider == "openai" {
+                    let service = OpenAIService()
+                    generatedMessage = try await service.generateCongratulation(
+                        for: person,
+                        apiKey: openAIAPIKey,
+                        customPrompt: customPrompt
+                    )
+                } else {
+                    let service = AnthropicService()
+                    generatedMessage = try await service.generateCongratulation(
+                        for: person,
+                        apiKey: anthropicAPIKey,
+                        customPrompt: customPrompt
+                    )
+                }
+            } catch {
+                aiError = error.localizedDescription
+            }
+            isGenerating = false
+        }
     }
 
     private func actionButton(_ title: String, icon: String, color: Color, action: @escaping () -> Void) -> some View {
@@ -435,5 +557,75 @@ struct MessageComposeView: UIViewControllerRepresentable {
         func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
             dismiss()
         }
+    }
+}
+
+// MARK: - Share Activity Button
+
+struct ShareActivityButton<Label: View>: UIViewControllerRepresentable {
+    let text: String
+    @ViewBuilder let label: () -> Label
+
+    func makeUIViewController(context: Context) -> ShareButtonHostController<Label> {
+        ShareButtonHostController(text: text, label: label)
+    }
+
+    func updateUIViewController(_ uiViewController: ShareButtonHostController<Label>, context: Context) {
+        uiViewController.updateText(text)
+    }
+}
+
+final class ShareButtonHostController<Label: View>: UIViewController {
+    private var text: String
+    private let label: () -> Label
+    private var hostingController: UIHostingController<AnyView>?
+
+    init(text: String, label: @escaping () -> Label) {
+        self.text = text
+        self.label = label
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .clear
+
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(shareButtonTapped), for: .touchUpInside)
+
+        let hc = UIHostingController(rootView: AnyView(label()))
+        hc.view.backgroundColor = .clear
+        hc.view.isUserInteractionEnabled = false
+        hc.view.translatesAutoresizingMaskIntoConstraints = false
+
+        view.addSubview(button)
+        button.addSubview(hc.view)
+        addChild(hc)
+        hc.didMove(toParent: self)
+        hostingController = hc
+
+        NSLayoutConstraint.activate([
+            button.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            button.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            button.topAnchor.constraint(equalTo: view.topAnchor),
+            button.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            hc.view.leadingAnchor.constraint(equalTo: button.leadingAnchor),
+            hc.view.trailingAnchor.constraint(equalTo: button.trailingAnchor),
+            hc.view.topAnchor.constraint(equalTo: button.topAnchor),
+            hc.view.bottomAnchor.constraint(equalTo: button.bottomAnchor),
+        ])
+    }
+
+    func updateText(_ newText: String) {
+        text = newText
+    }
+
+    @objc private func shareButtonTapped() {
+        let activityVC = UIActivityViewController(activityItems: [text], applicationActivities: nil)
+        activityVC.popoverPresentationController?.sourceView = view
+        present(activityVC, animated: true)
     }
 }

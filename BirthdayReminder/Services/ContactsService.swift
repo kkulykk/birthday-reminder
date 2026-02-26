@@ -1,12 +1,27 @@
 @preconcurrency import Contacts
 import Foundation
 
-@MainActor
+// MARK: - Protocol (for testability)
+
+protocol ContactStoreProtocol: Sendable {
+    func requestAccess(for entityType: CNEntityType, completionHandler: @escaping @Sendable (Bool, Error?) -> Void)
+    func enumerateContacts(with fetchRequest: CNContactFetchRequest, usingBlock block: @escaping (CNContact, UnsafeMutablePointer<ObjCBool>) -> Void) throws
+}
+
+extension CNContactStore: @retroactive @unchecked Sendable, ContactStoreProtocol {}
+
+// MARK: - ContactsService
+
 final class ContactsService {
+    private let store: ContactStoreProtocol
+
+    init(store: ContactStoreProtocol = CNContactStore()) {
+        self.store = store
+    }
 
     func requestPermission() async throws -> Bool {
         return try await withCheckedThrowingContinuation { continuation in
-            CNContactStore().requestAccess(for: .contacts) { granted, error in
+            store.requestAccess(for: .contacts) { granted, error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else {
@@ -29,6 +44,7 @@ final class ContactsService {
     }
 
     func fetchBirthdayContacts() async throws -> [CNContact] {
+        let store = self.store
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 // Build request inside the closure — avoids capturing non-Sendable CNContactFetchRequest
@@ -45,7 +61,6 @@ final class ContactsService {
                 let request = CNContactFetchRequest(keysToFetch: keys as [CNKeyDescriptor])
                 do {
                     var contacts: [CNContact] = []
-                    let store = CNContactStore()
                     try store.enumerateContacts(with: request) { contact, _ in
                         if contact.birthday != nil {
                             contacts.append(contact)

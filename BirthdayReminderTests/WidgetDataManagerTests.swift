@@ -163,4 +163,14 @@ final class WidgetDataManagerTests: XCTestCase {
         XCTAssertEqual(loaded[0].name, "New1")
         XCTAssertEqual(loaded[1].name, "New2")
     }
+
+    func testWidgetDataManager_corruptData_returnsEmpty() {
+        guard let defaults = UserDefaults(suiteName: WidgetDataManager.suiteName) else { return }
+        defer { defaults.removeObject(forKey: WidgetDataManager.key) }
+
+        // Write bytes that are valid Data but not a valid [WidgetBirthday] JSON
+        defaults.set(Data("not-valid-json-at-all".utf8), forKey: WidgetDataManager.key)
+        let result = WidgetDataManager.load()
+        XCTAssertTrue(result.isEmpty, "Corrupt data in UserDefaults should return empty array")
+    }
 }

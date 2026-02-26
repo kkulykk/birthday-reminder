@@ -1,13 +1,34 @@
 import UserNotifications
 import Foundation
 
-@MainActor
+// MARK: - Protocol (for testability)
+
+protocol NotificationCenterProtocol {
+    func isAlreadyAuthorized() async -> Bool
+    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
+    func removeAllPendingNotificationRequests()
+    func add(_ request: UNNotificationRequest) async throws
+    func removePendingNotificationRequests(withIdentifiers identifiers: [String])
+    func removeDeliveredNotifications(withIdentifiers identifiers: [String])
+}
+
+extension UNUserNotificationCenter: NotificationCenterProtocol {
+    func isAlreadyAuthorized() async -> Bool {
+        await notificationSettings().authorizationStatus == .authorized
+    }
+}
+
+// MARK: - NotificationService
+
 final class NotificationService {
-    private let center = UNUserNotificationCenter.current()
+    private let center: NotificationCenterProtocol
+
+    init(center: NotificationCenterProtocol = UNUserNotificationCenter.current()) {
+        self.center = center
+    }
 
     func requestPermission() async -> Bool {
-        let settings = await center.notificationSettings()
-        if settings.authorizationStatus == .authorized { return true }
+        if await center.isAlreadyAuthorized() { return true }
         return (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
     }
 
